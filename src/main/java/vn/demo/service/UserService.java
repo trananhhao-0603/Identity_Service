@@ -3,6 +3,8 @@ package vn.demo.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import vn.demo.dto.request.UserCreationRequest;
@@ -27,6 +29,11 @@ public class UserService {
 			throw new AppException(ErrorCode.USER_EXISTED);
 		}
 		User user = userMapper.toUser(request);
+
+		// encode password with BCrypt
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+
 		return userRepository.save(user);
 	}
 
