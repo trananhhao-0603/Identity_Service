@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import vn.demo.dto.request.ApiResponse;
 import vn.demo.dto.request.UserCreationRequest;
 import vn.demo.dto.request.UserUpdateRequest;
+import vn.demo.dto.response.UserResponse;
 import vn.demo.entity.User;
 import vn.demo.service.UserService;
 
@@ -40,12 +41,12 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}")
-	User getUser(@PathVariable String userId) {
+	UserResponse getUser(@PathVariable String userId) {
 		return userService.getUser(userId);
 	}
 
 	@PutMapping("/{userId}")
-	User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+	UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
 		return userService.updateUser(userId, request);
 	}
 

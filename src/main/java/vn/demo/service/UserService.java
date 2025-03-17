@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import vn.demo.dto.request.UserCreationRequest;
 import vn.demo.dto.request.UserUpdateRequest;
+import vn.demo.dto.response.UserResponse;
 import vn.demo.entity.User;
 import vn.demo.exception.AppException;
 import vn.demo.exception.ErrorCode;
@@ -29,15 +30,11 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
-	public User updateUser(String userId, UserUpdateRequest request) {
-		User user = getUser(userId);
+	public UserResponse updateUser(String userId, UserUpdateRequest request) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-		user.setPassword(request.getPassword());
-		user.setFirstName(request.getFirstName());
-		user.setLastName(request.getLastName());
-		user.setDob(request.getDob());
-
-		return userRepository.save(user);
+		userMapper.updateUser(user, request);
+		return userMapper.toUserResponse(userRepository.save(user));
 	}
 
 	public void deleteUser(String userId) {
@@ -48,8 +45,9 @@ public class UserService {
 		return userRepository.findAll();
 	}
 
-	public User getUser(String id) {
-		return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+	public UserResponse getUser(String id) {
+		return userMapper
+				.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
 	}
 
 }
