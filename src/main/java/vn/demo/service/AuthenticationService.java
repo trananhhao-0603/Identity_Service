@@ -1,9 +1,11 @@
 package vn.demo.service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,16 +14,21 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import vn.demo.dto.request.AuthenticationRequest;
+import vn.demo.dto.request.IntrospectRequest;
 import vn.demo.dto.response.AuthenticationResponse;
+import vn.demo.dto.response.IntrospectResponse;
 import vn.demo.exception.AppException;
 import vn.demo.exception.ErrorCode;
 import vn.demo.repository.UserRepository;
@@ -33,7 +40,22 @@ public class AuthenticationService {
 	UserRepository userRepository;
 
 	@NonFinal
-	protected static final String SIGNER_KEY = "hSWgPEWVi5X6MJWJWJF9HmR1sscFhTXcnL/HCPBOHzoH4m1VzLdH0JOT5I1UHjdI";
+	@Value("${jwt.signerKey}")
+	protected String SIGNER_KEY;
+
+	public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+		var token = request.getToken();
+
+		JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+		SignedJWT signedJWT = SignedJWT.parse(token);
+
+		Date expiredTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+		var verified = signedJWT.verify(verifier);
+
+		return IntrospectResponse.builder().valid(verified && expiredTime.after(new Date())).build();
+	}
 
 	public AuthenticationResponse authenticate(AuthenticationRequest request) {
 		var user = userRepository.findByUsername(request.getUsername())
@@ -47,7 +69,7 @@ public class AuthenticationService {
 		}
 		var token = generateToken(request.getUsername());
 
-		return AuthenticationResponse.builder().token(token).authenticated(true).build();
+		return AuthenticationResponse.builder().token(token).authenticated(authenticated).build();
 	}
 
 	String generateToken(String username) {
