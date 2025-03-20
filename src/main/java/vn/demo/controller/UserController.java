@@ -3,6 +3,7 @@ package vn.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,30 +14,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import vn.demo.dto.request.ApiResponse;
 import vn.demo.dto.request.UserCreationRequest;
 import vn.demo.dto.request.UserUpdateRequest;
 import vn.demo.dto.response.UserResponse;
-import vn.demo.entity.User;
 import vn.demo.service.UserService;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
 	@Autowired
 	private UserService userService;
 
 	@PostMapping
-	ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
-		ApiResponse<User> apiResponse = new ApiResponse<User>();
+	ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
 
-		apiResponse.setResult(userService.createUser(request));
-
-		return apiResponse;
+		return ApiResponse.<UserResponse>builder().result(userService.createUser(request)).build();
 	}
 
 	@GetMapping
 	ApiResponse<List<UserResponse>> getUsers() {
+		var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		log.warn("Username: {}", authentication.getName());
+		authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
+
 		return ApiResponse.<List<UserResponse>>builder().result(userService.getUsers()).build();
 	}
 
