@@ -48,8 +48,8 @@ public class UserService {
 		userRepository.deleteById(userId);
 	}
 
-	public List<User> getUsers() {
-		return userRepository.findAll();
+	public List<UserResponse> getUsers() {
+		return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
 	}
 
 	public UserResponse getUser(String id) {
