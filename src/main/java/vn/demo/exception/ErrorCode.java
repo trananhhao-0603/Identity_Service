@@ -1,25 +1,28 @@
 package vn.demo.exception;
 
-public enum ErrorCode {
-	UNCATEGORIZED_EXCEPTION(9999, "ERROR"), USER_EXISTED(1002, "User existed"),
-	USERNAME_INVALID(1003, "Username must be at least 3 characters"),
-	PASSWORD_INVALID(1004, "Password must be at least 8 characters"), NOT_AUTHENTICATED(1006, "User not authenticated"),
-	USER_NOTEXISTED(1005, "User not existed");
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
-	ErrorCode(int code, String message) {
+import lombok.Getter;
+
+@Getter
+public enum ErrorCode {
+	UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
+	USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
+	INVALID_KEY(1001, "Invalid key", HttpStatus.BAD_REQUEST),
+	USERNAME_INVALID(1003, "Username must be at least 3 characters", HttpStatus.BAD_REQUEST),
+	PASSWORD_INVALID(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
+	NOT_AUTHENTICATED(1006, "User not authenticated", HttpStatus.UNAUTHORIZED),
+	USER_NOTEXISTED(1005, "User not existed", HttpStatus.NOT_FOUND);
+
+	ErrorCode(int code, String message, HttpStatusCode statusCode) {
 		this.code = code;
 		this.message = message;
+		this.statusCode = statusCode;
 	}
 
 	private int code;
+	private HttpStatusCode statusCode;
 	private String message;
-
-	public int getCode() {
-		return code;
-	}
-
-	public String getMessage() {
-		return message;
-	}
 
 }

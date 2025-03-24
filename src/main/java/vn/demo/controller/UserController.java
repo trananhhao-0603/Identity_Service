@@ -60,4 +60,9 @@ public class UserController {
 		return "Deleted user successful";
 	}
 
+	@GetMapping("/myinfo")
+	ApiResponse<UserResponse> getMyInfo() {
+		return ApiResponse.<UserResponse>builder().result(userService.getMyInfo()).build();
+	}
+
 }
