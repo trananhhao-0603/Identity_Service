@@ -1,6 +1,5 @@
 package vn.demo.dto.response;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 import lombok.AccessLevel;
@@ -15,11 +14,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-	String id;
-	String username;
-	String firstName;
-	String lastName;
-	LocalDate dob;
-	Set<RoleResponse> roles;
+//check token validation
+public class RoleResponse {
+	String name;
+	String description;
+	Set<PermissionResponse> permissions;
 }
