@@ -3,6 +3,8 @@ package vn.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,12 +31,14 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
 
 		return ApiResponse.<UserResponse>builder().result(userService.createUser(request)).build();
 	}
 
 	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	ApiResponse<List<UserResponse>> getUsers() {
 		var authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -45,16 +49,19 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
 	UserResponse getUser(@PathVariable String userId) {
 		return userService.getUser(userId);
 	}
 
 	@PutMapping("/{userId}")
+	@PostAuthorize("returnObject.username == authentication.name")
 	UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
 		return userService.updateUser(userId, request);
 	}
 
 	@DeleteMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
 	String deleteUser(@PathVariable String userId) {
 		userService.deleteUser(userId);
 		return "Deleted user successful";

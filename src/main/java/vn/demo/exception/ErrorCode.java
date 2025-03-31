@@ -13,6 +13,7 @@ public enum ErrorCode {
 	USERNAME_INVALID(1003, "Username must be at least 3 characters", HttpStatus.BAD_REQUEST),
 	PASSWORD_INVALID(1004, "Password must be at least 8 characters", HttpStatus.BAD_REQUEST),
 	NOT_AUTHENTICATED(1006, "User not authenticated", HttpStatus.UNAUTHORIZED),
+	UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
 	USER_NOTEXISTED(1005, "User not existed", HttpStatus.NOT_FOUND);
 
 	ErrorCode(int code, String message, HttpStatusCode statusCode) {

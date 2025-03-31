@@ -3,8 +3,6 @@ package vn.demo.service;
 import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -63,17 +61,14 @@ public class UserService {
 		return userMapper.toUserResponse(userRepository.save(user));
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
 	public void deleteUser(String userId) {
 		userRepository.deleteById(userId);
 	}
 
-	@PreAuthorize("hasRole('ADMIN')")
 	public List<UserResponse> getUsers() {
 		return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
 	}
 
-	@PostAuthorize("returnObject.username == authentication.name")
 	public UserResponse getUser(String id) {
 		return userMapper
 				.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
