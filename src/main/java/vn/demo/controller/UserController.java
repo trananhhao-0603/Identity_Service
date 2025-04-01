@@ -68,6 +68,7 @@ public class UserController {
 	}
 
 	@GetMapping("/myinfo")
+	@PostAuthorize("returnObject.username == authentication.name")
 	ApiResponse<UserResponse> getMyInfo() {
 		return ApiResponse.<UserResponse>builder().result(userService.getMyInfo()).build();
 	}

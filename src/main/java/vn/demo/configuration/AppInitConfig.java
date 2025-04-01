@@ -5,7 +5,6 @@ import java.util.HashSet;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ import vn.demo.repository.UserRepository;
 @Slf4j
 public class AppInitConfig {
 
-	PasswordEncoder passwordEncoder;
+//	PasswordEncoder passwordEncoder;
 
 	@Bean
 	ApplicationRunner applicationRunner(UserRepository userRepository) {

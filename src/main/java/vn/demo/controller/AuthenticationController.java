@@ -15,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 import vn.demo.dto.request.ApiResponse;
 import vn.demo.dto.request.AuthenticationRequest;
 import vn.demo.dto.request.IntrospectRequest;
+import vn.demo.dto.request.LogOutRequest;
+import vn.demo.dto.request.RefreshRequest;
 import vn.demo.dto.response.AuthenticationResponse;
 import vn.demo.dto.response.IntrospectResponse;
 import vn.demo.service.AuthenticationService;
@@ -26,7 +28,7 @@ import vn.demo.service.AuthenticationService;
 public class AuthenticationController {
 	AuthenticationService authenticationService;
 
-	@PostMapping("/token")
+	@PostMapping("/login")
 	ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
 		var result = authenticationService.authenticate(request);
 		return ApiResponse.<AuthenticationResponse>builder().result(result).build();
@@ -37,5 +39,18 @@ public class AuthenticationController {
 			throws JOSEException, ParseException {
 		var result = authenticationService.introspect(request);
 		return ApiResponse.<IntrospectResponse>builder().result(result).build();
+	}
+
+	@PostMapping("/logout")
+	ApiResponse<Void> logout(@RequestBody LogOutRequest request) throws JOSEException, ParseException {
+		authenticationService.logOut(request);
+		return ApiResponse.<Void>builder().build();
+	}
+
+	@PostMapping("/refresh")
+	ApiResponse<AuthenticationResponse> authenticate(@RequestBody RefreshRequest request)
+			throws JOSEException, ParseException {
+		var result = authenticationService.refreshToken(request);
+		return ApiResponse.<AuthenticationResponse>builder().result(result).build();
 	}
 }
