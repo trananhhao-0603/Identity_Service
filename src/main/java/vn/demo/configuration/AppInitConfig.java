@@ -3,6 +3,7 @@ package vn.demo.configuration;
 import java.util.HashSet;
 
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,8 +30,10 @@ public class AppInitConfig {
     @NonFinal
     static final String ADMIN_PASSWORD = "admin";
 
+    @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository,
 	    RoleRepository roleRepository) {
+	log.info("Initializing application.....");
 	return args -> {
 	    if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
 		roleRepository.save(Role.builder().name("USER")
@@ -50,6 +53,7 @@ public class AppInitConfig {
 		log.warn(
 			"admin user has been created with default password: admin, please change it");
 	    }
+	    log.info("Application initialization completed .....");
 	};
     }
 }

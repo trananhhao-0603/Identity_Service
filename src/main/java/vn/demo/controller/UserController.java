@@ -27,50 +27,55 @@ import vn.demo.service.UserService;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-	@Autowired
-	private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
-	ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
-		log.info("User controller:  create method");
+    @PostMapping
+    ApiResponse<UserResponse> createUser(
+	    @RequestBody @Valid UserCreationRequest request) {
 
-		return ApiResponse.<UserResponse>builder().result(userService.createUser(request)).build();
-	}
+	return ApiResponse.<UserResponse>builder()
+		.result(userService.createUser(request)).build();
+    }
 
-	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
-	ApiResponse<List<UserResponse>> getUsers() {
-		var authentication = SecurityContextHolder.getContext().getAuthentication();
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<List<UserResponse>> getUsers() {
+	var authentication = SecurityContextHolder.getContext()
+		.getAuthentication();
 
-		log.warn("Username: {}", authentication.getName());
-		authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
+	log.warn("Username: {}", authentication.getName());
+	authentication.getAuthorities().forEach(
+		grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-		return ApiResponse.<List<UserResponse>>builder().result(userService.getUsers()).build();
-	}
+	return ApiResponse.<List<UserResponse>>builder()
+		.result(userService.getUsers()).build();
+    }
 
-	@GetMapping("/{userId}")
-	@PreAuthorize("hasRole('ADMIN')")
-	UserResponse getUser(@PathVariable String userId) {
-		return userService.getUser(userId);
-	}
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    UserResponse getUser(@PathVariable String userId) {
+	return userService.getUser(userId);
+    }
 
-	@PutMapping("/{userId}")
-	@PostAuthorize("returnObject.username == authentication.name")
-	UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-		return userService.updateUser(userId, request);
-	}
+    @PutMapping("/{userId}")
+    @PostAuthorize("returnObject.username == authentication.name")
+    UserResponse updateUser(@PathVariable String userId,
+	    @RequestBody UserUpdateRequest request) {
+	return userService.updateUser(userId, request);
+    }
 
-	@DeleteMapping("/{userId}")
-	@PreAuthorize("hasRole('ADMIN')")
-	String deleteUser(@PathVariable String userId) {
-		userService.deleteUser(userId);
-		return "Deleted user successful";
-	}
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    String deleteUser(@PathVariable String userId) {
+	userService.deleteUser(userId);
+	return "Deleted user successful";
+    }
 
-	@GetMapping("/myinfo")
-	ApiResponse<UserResponse> getMyInfo() {
-		return ApiResponse.<UserResponse>builder().result(userService.getMyInfo()).build();
-	}
+    @GetMapping("/myinfo")
+    ApiResponse<UserResponse> getMyInfo() {
+	return ApiResponse.<UserResponse>builder()
+		.result(userService.getMyInfo()).build();
+    }
 
 }

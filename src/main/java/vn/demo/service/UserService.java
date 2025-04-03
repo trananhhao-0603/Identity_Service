@@ -3,6 +3,7 @@ package vn.demo.service;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,19 +11,17 @@ import org.springframework.stereotype.Service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import vn.demo.dto.request.UserCreationRequest;
 import vn.demo.dto.request.UserUpdateRequest;
 import vn.demo.dto.response.UserResponse;
+import vn.demo.entity.Role;
 import vn.demo.entity.User;
-import vn.demo.enums.Role;
 import vn.demo.exception.AppException;
 import vn.demo.exception.ErrorCode;
 import vn.demo.mapper.UserMapper;
 import vn.demo.repository.RoleRepository;
 import vn.demo.repository.UserRepository;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,20 +33,23 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
     public UserResponse createUser(UserCreationRequest request) {
-	log.info("User service:  create method");
 
-	if (userRepository.existsByUsername(request.getUsername())) {
-	    throw new AppException(ErrorCode.USER_EXISTED);
-	}
 	User user = userMapper.toUser(request);
 
 	// encode password with BCrypt
 	user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-	HashSet<String> roles = new HashSet<>();
-	roles.add(Role.USER.name());
+	HashSet<Role> roles = new HashSet<>();
+	roleRepository.findById("USER").ifPresent(roles::add);
 
-	return userMapper.toUserResponse(userRepository.save(user));
+	user.setRoles(roles);
+	try {
+	    user = userRepository.save(user);
+	} catch (DataIntegrityViolationException e) {
+	    throw new AppException(ErrorCode.USER_EXISTED);
+	}
+
+	return userMapper.toUserResponse(user);
     }
 
     public UserResponse getMyInfo() {
