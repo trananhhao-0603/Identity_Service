@@ -33,6 +33,7 @@ public class UserController {
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+		log.info("User controller:  create method");
 
 		return ApiResponse.<UserResponse>builder().result(userService.createUser(request)).build();
 	}
@@ -68,7 +69,6 @@ public class UserController {
 	}
 
 	@GetMapping("/myinfo")
-	@PostAuthorize("returnObject.username == authentication.name")
 	ApiResponse<UserResponse> getMyInfo() {
 		return ApiResponse.<UserResponse>builder().result(userService.getMyInfo()).build();
 	}

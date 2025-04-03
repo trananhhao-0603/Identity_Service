@@ -1,6 +1,7 @@
 package vn.demo.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,49 +15,75 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-	private final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/login", "/auth/introspect", "/auth/logout",
-			"/auth/refresh" };
+    private static final String[] PUBLIC_ENDPOINTS = { "/users", "/auth/login",
+		    "/auth/introspect", "/auth/logout", "/auth/refresh" };
 
-	@Value("${jwt.signerKey}")
-	private String secretKey;
+    @Value("${jwt.signerKey}")
+    private String secretKey;
 
-	@Autowired
-	private CustomJwtDecoder customJwtDecoder;
+    private CustomJwtDecoder customJwtDecoder;
 
-	@Bean
-	SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
-				.permitAll().anyRequest().authenticated());
+    public SecurityConfig(CustomJwtDecoder customJwtDecoder) {
 
-		httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
-				.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
-						.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-				.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+	this.customJwtDecoder = customJwtDecoder;
+    }
 
-		httpSecurity.csrf(AbstractHttpConfigurer::disable);
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity httpSecurity)
+	    throws Exception {
+	httpSecurity.authorizeHttpRequests(request -> request
+		.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+		.anyRequest().authenticated());
 
-		return httpSecurity.build();
-	}
+	httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
+		.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
+			.jwtAuthenticationConverter(
+				jwtAuthenticationConverter()))
+		.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
-	@Bean
-	JwtAuthenticationConverter jwtAuthenticationConverter() {
-		JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-		jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+	httpSecurity.csrf(AbstractHttpConfigurer::disable);
+	httpSecurity.cors(
+		cors -> cors.configurationSource(corsConfigurationSource()));
 
-		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-		return jwtAuthenticationConverter;
-	}
+	return httpSecurity.build();
+    }
 
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(10);
-	}
+    @Bean
+    UrlBasedCorsConfigurationSource corsConfigurationSource() {
+	CorsConfiguration config = new CorsConfiguration();
+	config.setAllowedOrigins(List.of("http://localhost:3000"));
+	config.setAllowedMethods(
+		List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	config.setAllowedHeaders(List.of("*"));
+	config.setAllowCredentials(true);
+
+	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	source.registerCorsConfiguration("/**", config);
+	return source;
+    }
+
+    @Bean
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
+	JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+	jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+
+	JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+	jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+		jwtGrantedAuthoritiesConverter);
+	return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+	return new BCryptPasswordEncoder(10);
+    }
 
 }
