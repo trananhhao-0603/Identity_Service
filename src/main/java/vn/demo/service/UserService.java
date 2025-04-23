@@ -84,8 +84,9 @@ public class UserService {
     }
 
     public UserResponse getUser(String id) {
-	return userMapper.toUserResponse(userRepository.findById(id)
-		.orElseThrow(() -> new RuntimeException("User not found")));
+	return userMapper
+		.toUserResponse(userRepository.findById(id).orElseThrow(
+			() -> new AppException(ErrorCode.USER_NOTEXISTED)));
     }
 
 }
